@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — História da Publicidade no Brasil</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --vinho: #6B2737; --vinho-escuro: #4A1A25; --vinho-claro: #8B3A4A;
+    --dourado: #C8952A; --dourado-claro: #E8B84B;
+    --creme: #F5ECD7; --creme-escuro: #E8D5B0;
+    --texto: #2C1A0E; --branco: #FFFFFF;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--vinho-escuro); min-height: 100vh; color: var(--texto); background-image: radial-gradient(ellipse at top, #7a2d3f 0%, var(--vinho-escuro) 60%); }
+  #tela-inicio { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; text-align: center; }
+  .badge-ano { background: var(--dourado); color: var(--vinho-escuro); font-weight: 700; font-size: 0.8rem; letter-spacing: 3px; padding: 0.4rem 1.2rem; border-radius: 20px; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .titulo-inicio { font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 6vw, 4rem); color: var(--creme); line-height: 1.1; margin-bottom: 0.5rem; }
+  .titulo-inicio span { color: var(--dourado-claro); }
+  .subtitulo-inicio { color: var(--creme-escuro); font-size: 1.05rem; margin-bottom: 2.5rem; opacity: 0.85; max-width: 420px; }
+  .stats-row { display: flex; gap: 2rem; margin-bottom: 2.5rem; flex-wrap: wrap; justify-content: center; }
+  .stat-numero { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--dourado-claro); display: block; }
+  .stat-label { font-size: 0.78rem; color: var(--creme-escuro); text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+  .btn-iniciar { background: var(--dourado); color: var(--vinho-escuro); border: none; padding: 1rem 2.8rem; font-size: 1.05rem; font-weight: 700; border-radius: 50px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; box-shadow: 0 4px 20px rgba(200,149,42,0.4); }
+  .btn-iniciar:hover { background: var(--dourado-claro); transform: translateY(-2px); }
+  .credito-inicio { margin-top: 2rem; font-size: 0.8rem; color: var(--creme-escuro); opacity: 0.5; }
+  #tela-quiz { display: none; min-height: 100vh; padding: 1.5rem; max-width: 760px; margin: 0 auto; }
+  .quiz-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.8rem; }
+  .progresso-texto { font-size: 0.82rem; color: var(--creme-escuro); opacity: 0.7; font-weight: 500; }
+  .barra-container { flex: 1; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 0 1rem; min-width: 120px; }
+  .barra-fill { height: 100%; background: linear-gradient(90deg, var(--dourado), var(--dourado-claro)); border-radius: 10px; transition: width 0.5s ease; }
+  .pontos-badge { background: rgba(200,149,42,0.15); border: 1px solid rgba(200,149,42,0.3); color: var(--dourado-claro); font-size: 0.82rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: 20px; }
+  .card-pergunta { background: var(--creme); border-radius: 16px; padding: 2rem 2rem 1.5rem; margin-bottom: 1rem; box-shadow: 0 8px 40px rgba(0,0,0,0.3); }
+  .numero-pergunta { font-size: 0.75rem; font-weight: 700; color: var(--vinho-claro); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.8rem; }
+  .texto-pergunta { font-family: 'Playfair Display', serif; font-size: clamp(1.05rem, 2.5vw, 1.3rem); color: var(--vinho-escuro); line-height: 1.5; font-weight: 700; }
+  .opcoes-grid { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1rem; }
+  .opcao-btn { background: rgba(255,255,255,0.06); border: 1.5px solid rgba(245,236,215,0.2); color: var(--creme); padding: 0.9rem 1.2rem; border-radius: 12px; cursor: pointer; text-align: left; font-size: 0.95rem; font-family: 'Inter', sans-serif; transition: all 0.18s; display: flex; align-items: center; gap: 0.9rem; }
+  .opcao-btn:hover:not(:disabled) { background: rgba(200,149,42,0.15); border-color: var(--dourado); transform: translateX(4px); }
+  .letra-opcao { background: rgba(200,149,42,0.2); color: var(--dourado-claro); font-weight: 700; font-size: 0.8rem; width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .opcao-btn.correta { background: rgba(45,106,79,0.25); border-color: #4CAF82; color: #a8f0c6; }
+  .opcao-btn.correta .letra-opcao { background: #2D6A4F; color: #fff; }
+  .opcao-btn.errada { background: rgba(139,26,26,0.25); border-color: #e57373; color: #ffb3b3; }
+  .opcao-btn.errada .letra-opcao { background: #8B1A1A; color: #fff; }
+  .opcao-btn:disabled { cursor: not-allowed; }
+  .feedback-box { border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1rem; display: none; }
+  .feedback-box.acerto { border-left: 4px solid #4CAF82; background: rgba(45,106,79,0.15); }
+  .feedback-box.erro { border-left: 4px solid #e57373; background: rgba(139,26,26,0.15); }
+  .feedback-titulo { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .feedback-box.acerto .feedback-titulo { color: #a8f0c6; }
+  .feedback-box.erro .feedback-titulo { color: #ffb3b3; }
+  .feedback-texto { font-size: 0.88rem; color: var(--creme-escuro); line-height: 1.5; opacity: 0.9; }
+  .btn-proxima { background: var(--dourado); color: var(--vinho-escuro); border: none; padding: 0.9rem 2rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: none; width: 100%; }
+  .btn-proxima:hover { background: var(--dourado-claro); transform: translateY(-1px); }
+  #tela-resultado { display: none; min-height: 100vh; padding: 2rem; max-width: 600px; margin: 0 auto; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .emoji-resultado { font-size: 4rem; margin-bottom: 1rem; display: block; }
+  .titulo-resultado { font-family: 'Playfair Display', serif; font-size: clamp(1.8rem, 5vw, 2.8rem); color: var(--creme); margin-bottom: 0.5rem; }
+  .subtitulo-resultado { color: var(--creme-escuro); opacity: 0.8; margin-bottom: 2rem; font-size: 1rem; }
+  .placar-grande { background: linear-gradient(135deg, var(--dourado), var(--dourado-claro)); color: var(--vinho-escuro); border-radius: 20px; padding: 1.5rem 3rem; margin-bottom: 2rem; box-shadow: 0 8px 30px rgba(200,149,42,0.4); }
+  .placar-numero { font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 900; line-height: 1; }
+  .placar-label { font-size: 0.85rem; font-weight: 600; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+  .mensagem-resultado { background: rgba(255,255,255,0.07); border: 1px solid rgba(245,236,215,0.15); border-radius: 14px; padding: 1.2rem 1.5rem; color: var(--creme-escuro); font-size: 0.95rem; line-height: 1.6; margin-bottom: 2rem; max-width: 460px; }
+  .btn-reiniciar { background: var(--dourado); color: var(--vinho-escuro); border: none; padding: 0.9rem 2rem; font-size: 0.95rem; font-weight: 700; border-radius: 50px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; }
+  .btn-reiniciar:hover { background: var(--dourado-claro); transform: translateY(-2px); }
+  .credito-final { margin-top: 2rem; font-size: 0.78rem; color: var(--creme-escuro); opacity: 0.4; }
+  @media (max-width: 480px) { .card-pergunta { padding: 1.4rem 1.2rem; } }
+</style>
+</head>
+<body>
+
+<div id="tela-inicio">
+  <div class="badge-ano">1920 – 1950</div>
+  <h1 class="titulo-inicio">História da<br><span>Publicidade</span><br>no Brasil</h1>
+  <p class="subtitulo-inicio">Teste o que você aprendeu sobre o período que moldou a comunicação brasileira.</p>
+  <div class="stats-row">
+    <div class="stat-item"><span class="stat-numero">15</span><span class="stat-label">Perguntas</span></div>
+    <div class="stat-item"><span class="stat-numero">4</span><span class="stat-label">Alternativas</span></div>
+    <div class="stat-item"><span class="stat-numero">∞</span><span class="stat-label">Tentativas</span></div>
+  </div>
+  <button class="btn-iniciar" onclick="iniciarQuiz()">Começar Quiz →</button>
+  <p class="credito-inicio">História da Comunicação · UNIVALI Itajaí</p>
+</div>
+
+<div id="tela-quiz">
+  <div class="quiz-header">
+    <span class="progresso-texto" id="progresso-texto">1 / 15</span>
+    <div class="barra-container"><div class="barra-fill" id="barra-fill" style="width:0%"></div></div>
+    <span class="pontos-badge" id="pontos-badge">0 pts</span>
+  </div>
+  <div class="card-pergunta">
+    <div class="numero-pergunta" id="numero-pergunta">Pergunta 1</div>
+    <div class="texto-pergunta" id="texto-pergunta"></div>
+  </div>
+  <div class="opcoes-grid" id="opcoes-grid"></div>
+  <div class="feedback-box" id="feedback-box">
+    <div class="feedback-titulo" id="feedback-titulo"></div>
+    <div class="feedback-texto" id="feedback-texto"></div>
+  </div>
+  <button class="btn-proxima" id="btn-proxima" onclick="proximaPergunta()">Próxima →</button>
+</div>
+
+<div id="tela-resultado">
+  <span class="emoji-resultado" id="emoji-resultado">🏆</span>
+  <h2 class="titulo-resultado" id="titulo-resultado"></h2>
+  <p class="subtitulo-resultado" id="subtitulo-resultado"></p>
+  <div class="placar-grande">
+    <div class="placar-numero" id="placar-numero">0/15</div>
+    <div class="placar-label">acertos</div>
+  </div>
+  <div class="mensagem-resultado" id="mensagem-resultado"></div>
+  <button class="btn-reiniciar" onclick="reiniciar()">↺ Tentar de novo</button>
+  <p class="credito-final">História da Comunicação · UNIVALI Itajaí · Pablo</p>
+</div>
+
+<script>
+const banco = [
+  {
+    pergunta: "Qual era o principal produto de exportação do Brasil antes da Crise de 1929?",
+    opcoes: ["Borracha", "Café", "Algodão", "Açúcar"],
+    correta: 1,
+    explicacao: "O café representava cerca de 70% das exportações brasileiras. A crise de 1929 derrubou os preços e o Brasil chegou a queimar sacas de café para tentar segurar o preço — um símbolo do colapso da República Velha."
+  },
+  {
+    pergunta: "O DIP exibia cinejornais obrigatórios antes dos filmes nos cinemas. O que esses filmes mostravam?",
+    opcoes: ["Propagandas de produtos como sabonetes e remédios", "Vargas inaugurando obras, sempre com narração ufanista — ninguém escolhia assistir", "Noticiários internacionais sobre a Segunda Guerra", "Animações educativas sobre higiene para a população"],
+    correta: 1,
+    explicacao: "O DIP produziu o Cine Jornal Brasileiro: filmes curtos obrigatórios exibidos em todos os cinemas antes dos filmes. Mostravam Vargas inaugurando obras, discursando, sendo aclamado. O conteúdo era todo censurado e controlado pelo governo."
+  },
+  {
+    pergunta: "Antes da publicidade profissional, como os mascates e tropeiros faziam suas vendas?",
+    opcoes: ["Por anúncios em jornais e cartazes nas cidades", "Percorrendo rios e montanhas de barco ou lombo de mula, entregando na mão do cliente", "Por catálogos enviados pelo correio para as casas", "Em feiras fixas mensais nas praças das cidades"],
+    correta: 1,
+    explicacao: "Mascates e tropeiros eram os primeiros vendedores porta a porta do Brasil. Com chuva e sol, subindo rios e montanhas, a mercadoria chegava nas mãos do próprio cliente. Ninguém era 'cliente' — era 'freguês'."
+  },
+  {
+    pergunta: "Qual foi a primeira agência de publicidade profissional do Brasil?",
+    opcoes: ["Agência Ayer", "J. Walter Thompson", "A Eclética, fundada por João Castaldi em 1914", "McCann Erickson"],
+    correta: 2,
+    explicacao: "A Eclética foi fundada em São Paulo por João Castaldi em 1914. Inicialmente intermediava anúncios em jornais, mas com o tempo passou a oferecer planejamento aos clientes. Serviu de modelo para as agências futuras."
+  },
+  {
+    pergunta: "Nos anos 1920, qual nova mídia começou a abrir espaço para os primeiros anúncios sonoros no Brasil?",
+    opcoes: ["A televisão", "O cinema", "O rádio", "As revistas ilustradas"],
+    correta: 2,
+    explicacao: "O rádio foi a grande revolução dos anos 1920. A primeira transmissão no Brasil foi em 1922, e a publicidade no rádio foi liberada em 1932. O rádio popularizou grandes marcas e aumentou a concorrência entre anunciantes."
+  },
+  {
+    pergunta: "A Cafiaspirina da Bayer, anunciada na Revista O Cruzeiro de 1930, pertencia a qual segmento?",
+    opcoes: ["Cigarros e tabaco", "Automóveis", "Medicamentos e farmacêuticos", "Higiene e beleza"],
+    correta: 2,
+    explicacao: "A Cafiaspirina da Bayer é um exemplo clássico do segmento de medicamentos — que prometia saúde, energia e cura. Era um dos segmentos mais anunciantes da época, junto com cigarros, higiene e automóveis."
+  },
+  {
+    pergunta: "Qual marca anunciou em 1939 na Revista do Globo que já havia construído 27 milhões de carros?",
+    opcoes: ["General Motors", "Ford V-8", "Chevrolet", "Volkswagen"],
+    correta: 1,
+    explicacao: "O anúncio da Ford V-8 de agosto de 1939 destacava que 'um carro vale tanto quanto a experiência de seu fabricante' e que a Ford já havia construído 27 milhões de carros. Os automóveis eram anunciados para o público de maior poder aquisitivo."
+  },
+  {
+    pergunta: "O Sabonete Lifebuoy anunciado em 1942 na Revista A Cigarra usava qual apelo para vender o produto?",
+    opcoes: ["Status social e elegância", "Preço acessível para toda a família", "Saúde — 'Meu Asseio Corporal é entregue à Lifebuoy, sabonete de saúde'", "Tecnologia importada da Europa"],
+    correta: 2,
+    explicacao: "O anúncio do Lifebuoy de 1942 usava o apelo da saúde e higiene pessoal. Produtos de higiene como sabonetes eram um dos principais segmentos anunciantes da época — inclusive ensinavam a população a usar creme dental e sabonete."
+  },
+  {
+    pergunta: "Qual foi o primeiro comercial transmitido pela televisão no mundo?",
+    opcoes: ["Um anúncio da Coca-Cola nos EUA em 1938", "Um anúncio de 10 segundos da Bulova, fabricante de relógios, em 1º de julho de 1941", "Uma propaganda do governo americano durante a 2ª Guerra em 1943", "Um comercial da Ford para o lançamento de um novo modelo em 1940"],
+    correta: 1,
+    explicacao: "Em 1º de julho de 1941, o canal WNBT de Nova York transmitiu o primeiro comercial televisivo da história — da Bulova, fabricante de relógios. O anúncio de 10 segundos exibia um relógio sobre o mapa dos EUA e custou apenas 9 dólares."
+  },
+  {
+    pergunta: "Quem inaugurou a TV Tupi em 1950, a primeira emissora de televisão do Brasil e da América Latina?",
+    opcoes: ["Getúlio Vargas", "Rodolfo Lima Martensen", "Assis Chateaubriand", "João Castaldi"],
+    correta: 2,
+    explicacao: "Assis Chateaubriand inaugurou a TV Tupi em São Paulo em 1950. Os primeiros anúncios eram ao vivo, com 'garotas-propaganda' demonstrando produtos. Herdaram a estrutura de patrocínio único já consolidada no rádio."
+  },
+  {
+    pergunta: "Bastos Tigre criou em 1922 um dos slogans mais duradouros da publicidade brasileira. Qual foi?",
+    opcoes: ["'Não é bom? Não!' para a Bayer", "'Se é Bayer, é bom' para a Bayer", "'Saúde que se bebe' para a Brahma", "'Chopp em Garrafa' para a Brahma"],
+    correta: 1,
+    explicacao: "Bastos Tigre criou 'Se é Bayer, é bom' em 1922 — considerado um dos slogans mais duradouros da publicidade brasileira. Ele também escreveu a letra do jingle 'Chopp em Garrafa' da Brahma, considerado o primeiro jingle publicitário do país."
+  },
+  {
+    pergunta: "Origines Lessa conseguiu construir duas carreiras ao mesmo tempo. Quais eram?",
+    opcoes: ["Jornalista e político", "Escritor e redator publicitário", "Músico e apresentador de rádio", "Professor e diretor de cinema"],
+    correta: 1,
+    explicacao: "Origines Lessa (1903-1986) trabalhou em agências importantes e contribuiu para o desenvolvimento da redação publicitária brasileira. Posteriormente tornou-se membro da Academia Brasileira de Letras — construindo duas carreiras: a de escritor e a de publicitário."
+  },
+  {
+    pergunta: "Rodolfo Lima Martensen foi o idealizador de qual escola que existe até hoje?",
+    opcoes: ["ESPM — Escola Superior de Propaganda e Marketing", "ECA — Escola de Comunicações e Artes da USP", "FAAP — Fundação Armando Álvares Penteado", "UNIVALI — Universidade do Vale do Itajaí"],
+    correta: 0,
+    explicacao: "Rodolfo Lima Martensen (1915-1992) foi um dos responsáveis pela profissionalização da propaganda brasileira e idealizador da Escola de Propaganda do MASP, que daria origem à ESPM — escola que existe e forma publicitários até hoje."
+  },
+  {
+    pergunta: "Alex Periscinato representou o Brasil em qual evento histórico em 1947?",
+    opcoes: ["1º Festival Internacional de Cinema em Cannes", "1º Congresso Internacional de Propaganda, em Paris", "1ª Bienal de Arte de São Paulo", "1ª Conferência Pan-Americana de Comunicação"],
+    correta: 1,
+    explicacao: "Alex Periscinato (1925-2021) representou o Brasil no 1º Congresso Internacional de Propaganda, em Paris, em 1947. Alguns anos depois, fundou a primeira escola de propaganda do país — contribuindo diretamente para a profissionalização do setor."
+  },
+  {
+    pergunta: "Qual era o sistema de crédito usado nos armazéns como o São Thiago, em Santa Teresa no Rio?",
+    opcoes: ["Cheques bancários assinados pelo cliente", "A caderneta — o dono anotava o que você devia, valendo só a palavra", "Carnês mensais com juros cobrados pelo armazém", "Cartas de crédito emitidas por bancos regionais"],
+    correta: 1,
+    explicacao: "A caderneta era o sistema de crédito da época: o dono do armazém anotava o que você devia e recebia no fim do mês. Sem contrato, sem juros, sem SPC. Era a palavra que valia. O Armazém São Thiago, fundado em 1919 em Santa Teresa, é um exemplo real desse comércio que ainda existe hoje como patrimônio cultural do Rio."
+  }
+];
+
+let ordem = [], atual = 0, pontos = 0, respondido = false;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function iniciarQuiz() {
+  ordem = shuffle([...Array(banco.length).keys()]);
+  atual = 0; pontos = 0; respondido = false;
+  document.getElementById('tela-inicio').style.display = 'none';
+  document.getElementById('tela-quiz').style.display = 'block';
+  carregarPergunta();
+}
+
+function carregarPergunta() {
+  respondido = false;
+  const p = banco[ordem[atual]];
+  const letras = ['A','B','C','D'];
+  document.getElementById('numero-pergunta').textContent = `Pergunta ${atual + 1}`;
+  document.getElementById('texto-pergunta').textContent = p.pergunta;
+  document.getElementById('progresso-texto').textContent = `${atual + 1} / ${banco.length}`;
+  document.getElementById('barra-fill').style.width = `${(atual / banco.length) * 100}%`;
+  document.getElementById('pontos-badge').textContent = `${pontos} pts`;
+  const grid = document.getElementById('opcoes-grid');
+  grid.innerHTML = '';
+  p.opcoes.forEach((opcao, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opcao-btn';
+    btn.innerHTML = `<span class="letra-opcao">${letras[i]}</span>${opcao}`;
+    btn.onclick = () => responder(i, btn);
+    grid.appendChild(btn);
+  });
+  const fb = document.getElementById('feedback-box');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('btn-proxima').style.display = 'none';
+}
+
+function responder(indice, btnClicado) {
+  if (respondido) return;
+  respondido = true;
+  const p = banco[ordem[atual]];
+  const botoes = document.querySelectorAll('.opcao-btn');
+  botoes.forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback-box');
+  if (indice === p.correta) {
+    pontos++;
+    btnClicado.classList.add('correta');
+    fb.className = 'feedback-box acerto';
+    document.getElementById('feedback-titulo').textContent = '✓ Correto!';
+  } else {
+    btnClicado.classList.add('errada');
+    botoes[p.correta].classList.add('correta');
+    fb.className = 'feedback-box erro';
+    document.getElementById('feedback-titulo').textContent = '✗ Errado';
+  }
+  document.getElementById('feedback-texto').textContent = p.explicacao;
+  fb.style.display = 'block';
+  const btnProx = document.getElementById('btn-proxima');
+  btnProx.style.display = 'block';
+  btnProx.textContent = atual < banco.length - 1 ? 'Próxima →' : 'Ver resultado →';
+}
+
+function proximaPergunta() {
+  atual++;
+  if (atual < banco.length) { carregarPergunta(); } else { mostrarResultado(); }
+}
+
+function mostrarResultado() {
+  document.getElementById('tela-quiz').style.display = 'none';
+  const tela = document.getElementById('tela-resultado');
+  tela.style.display = 'flex';
+  const pct = (pontos / banco.length) * 100;
+  document.getElementById('placar-numero').textContent = `${pontos}/${banco.length}`;
+  let emoji, titulo, subtitulo, mensagem;
+  if (pct === 100) {
+    emoji='🏆'; titulo='Perfeito!'; subtitulo='Você acertou tudo!';
+    mensagem='Impressionante! Você domina a história da publicidade brasileira de 1920 a 1950. Está mais do que preparado para a apresentação.';
+  } else if (pct >= 80) {
+    emoji='🥇'; titulo='Muito bem!'; subtitulo=`${pontos} de 15 acertos`;
+    mensagem='Ótimo desempenho! Você conhece bem o período. Revise as perguntas que errou e estará pronto para apresentar com confiança.';
+  } else if (pct >= 60) {
+    emoji='📚'; titulo='Bom trabalho!'; subtitulo=`${pontos} de 15 acertos`;
+    mensagem='Você tem uma boa base! Recomendo rever os pontos sobre o DIP, as agências e os principais nomes para garantir um resultado ainda melhor.';
+  } else if (pct >= 40) {
+    emoji='📰'; titulo='Continue estudando!'; subtitulo=`${pontos} de 15 acertos`;
+    mensagem='Você pegou alguns pontos importantes, mas ainda há conteúdo para revisar. Volte nos slides e tente de novo.';
+  } else {
+    emoji='🎙️'; titulo='Vai estudar!'; subtitulo=`${pontos} de 15 acertos`;
+    mensagem='Não desanime — esse é um período rico e complexo. Recomendo rever todos os slides e tentar o quiz novamente.';
+  }
+  document.getElementById('emoji-resultado').textContent = emoji;
+  document.getElementById('titulo-resultado').textContent = titulo;
+  document.getElementById('subtitulo-resultado').textContent = subtitulo;
+  document.getElementById('mensagem-resultado').textContent = mensagem;
+}
+
+function reiniciar() {
+  document.getElementById('tela-resultado').style.display = 'none';
+  iniciarQuiz();
+}
+</script>
+</body>
+</html>
