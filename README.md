@@ -1,1 +1,1 @@
-# quiz-historia-da-comunica-ao
+# quiz-historia-da-comunicacao
